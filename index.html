@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hubble-Quiz</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; line-height: 1.4; }
+    .card { max-width: 720px; margin: 0 auto; padding: 18px; border: 1px solid #ddd; border-radius: 14px; }
+    h1 { margin: 0 0 10px; font-size: 1.4rem; }
+    .q { margin: 16px 0; padding: 12px; border: 1px solid #eee; border-radius: 12px; }
+    .q-title { margin: 0 0 10px; font-weight: 600; }
+    label { display: block; padding: 6px 8px; border-radius: 10px; cursor: pointer; }
+    label:hover { background: #f6f6f6; }
+    button { padding: 10px 14px; border: 0; border-radius: 12px; cursor: pointer; }
+    button:hover { filter: brightness(0.95); }
+    #result { margin-top: 14px; font-weight: 700; }
+    .small { color: #666; font-size: 0.95rem; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Mini-Quiz: Hubble-Konstante</h1>
+    <div class="small">Wähle pro Frage eine Antwort und klicke auf „Auswerten“.</div>
+
+    <form id="quiz">
+      <div class="q">
+        <p class="q-title">1) Was beschreibt die Hubble-Konstante \(H_0\) am besten?</p>
+        <label><input type="radio" name="q1" value="a"> Die Temperatur der kosmischen Hintergrundstrahlung</label>
+        <label><input type="radio" name="q1" value="b"> Wie stark die Fluchtgeschwindigkeit mit der Entfernung zunimmt</label>
+        <label><input type="radio" name="q1" value="c"> Die Masse einer typischen Galaxie</label>
+      </div>
+
+      <div class="q">
+        <p class="q-title">2) Welche Beziehung passt zum Hubble-Gesetz?</p>
+        <label><input type="radio" name="q2" value="a"> \(v = H_0 \cdot d\)</label>
+        <label><input type="radio" name="q2" value="b"> \(d = H_0 \cdot v^2\)</label>
+        <label><input type="radio" name="q2" value="c"> \(v = \frac{d}{H_0^2}\)</label>
+      </div>
+
+      <div class="q">
+        <p class="q-title">3) Was bedeutet „kein Mittelpunkt der Expansion“ (Luftballon-Modell)?</p>
+        <label><input type="radio" name="q3" value="a"> Galaxien bewegen sich von einem Explosionszentrum weg</label>
+        <label><input type="radio" name="q3" value="b"> Der Raum selbst dehnt sich aus, jeder Punkt sieht andere wegdriften</label>
+        <label><input type="radio" name="q3" value="c"> Nur unsere Galaxie bewegt sich, alle anderen stehen still</label>
+      </div>
+
+      <button type="button" onclick="grade()">Auswerten</button>
+      <button type="reset" style="margin-left:8px;">Zurücksetzen</button>
+
+      <div id="result"></div>
+    </form>
+  </div>
+
+  <script>
+    // richtige Antworten (b, a, b)
+    const key = { q1: "b", q2: "a", q3: "b" };
+
+    function grade() {
+      const form = document.getElementById("quiz");
+      let score = 0;
+      let total = Object.keys(key).length;
+
+      for (const q of Object.keys(key)) {
+        const chosen = form.querySelector(`input[name="${q}"]:checked`);
+        if (chosen && chosen.value === key[q]) score++;
+      }
+
+      const result = document.getElementById("result");
+      if (score === total) {
+        result.textContent = `✅ ${score}/${total} richtig – stark!`;
+      } else {
+        result.textContent = `➡️ ${score}/${total} richtig. Tipp: Schau dir das Hubble-Gesetz v = H0 · d nochmal an.`;
+      }
+    }
+  </script>
+</body>
+</html>
