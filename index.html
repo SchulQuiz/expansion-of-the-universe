@@ -2,77 +2,158 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
   <title>Hubble-Quiz</title>
-  <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 24px; line-height: 1.4; }
-    .card { max-width: 720px; margin: 0 auto; padding: 18px; border: 1px solid #ddd; border-radius: 14px; }
-    h1 { margin: 0 0 10px; font-size: 1.4rem; }
-    .q { margin: 16px 0; padding: 12px; border: 1px solid #eee; border-radius: 12px; }
-    .q-title { margin: 0 0 10px; font-weight: 600; }
-    label { display: block; padding: 6px 8px; border-radius: 10px; cursor: pointer; }
-    label:hover { background: #f6f6f6; }
-    button { padding: 10px 14px; border: 0; border-radius: 12px; cursor: pointer; }
-    button:hover { filter: brightness(0.95); }
-    #result { margin-top: 14px; font-weight: 700; }
-    .small { color: #666; font-size: 0.95rem; margin-top: 6px; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div class="card">
-    <h1>Mini-Quiz: Hubble-Konstante</h1>
-    <div class="small">Wähle pro Frage eine Antwort und klicke auf „Auswerten“.</div>
-
-    <form id="quiz">
-      <div class="q">
-        <p class="q-title">1) Was beschreibt die Hubble-Konstante \(H_0\) am besten?</p>
-        <label><input type="radio" name="q1" value="a"> Die Temperatur der kosmischen Hintergrundstrahlung</label>
-        <label><input type="radio" name="q1" value="b"> Wie stark die Fluchtgeschwindigkeit mit der Entfernung zunimmt</label>
-        <label><input type="radio" name="q1" value="c"> Die Masse einer typischen Galaxie</label>
-      </div>
-
-      <div class="q">
-        <p class="q-title">2) Welche Beziehung passt zum Hubble-Gesetz?</p>
-        <label><input type="radio" name="q2" value="a"> \(v = H_0 \cdot d\)</label>
-        <label><input type="radio" name="q2" value="b"> \(d = H_0 \cdot v^2\)</label>
-        <label><input type="radio" name="q2" value="c"> \(v = \frac{d}{H_0^2}\)</label>
-      </div>
-
-      <div class="q">
-        <p class="q-title">3) Was bedeutet „kein Mittelpunkt der Expansion“ (Luftballon-Modell)?</p>
-        <label><input type="radio" name="q3" value="a"> Galaxien bewegen sich von einem Explosionszentrum weg</label>
-        <label><input type="radio" name="q3" value="b"> Der Raum selbst dehnt sich aus, jeder Punkt sieht andere wegdriften</label>
-        <label><input type="radio" name="q3" value="c"> Nur unsere Galaxie bewegt sich, alle anderen stehen still</label>
-      </div>
-
-      <button type="button" onclick="grade()">Auswerten</button>
-      <button type="reset" style="margin-left:8px;">Zurücksetzen</button>
-
-      <div id="result"></div>
-    </form>
+  <div class="bg">
+    <div class="glow g1" aria-hidden="true"></div>
+    <div class="glow g2" aria-hidden="true"></div>
+    <div class="glow g3" aria-hidden="true"></div>
   </div>
 
-  <script>
-    // richtige Antworten (b, a, b)
-    const key = { q1: "b", q2: "a", q3: "b" };
+  <main class="wrap">
+    <header class="hero">
+      <div class="badge">Mini-Quiz • Astronomie</div>
+      <h1>Hubble-Konstante</h1>
+      <p class="sub">
+        3 Fragen. Sofortige Auswertung. Bitte pro Frage genau eine Antwort wählen.
+      </p>
 
-    function grade() {
-      const form = document.getElementById("quiz");
-      let score = 0;
-      let total = Object.keys(key).length;
+      <div class="progress" aria-label="Fortschritt">
+        <div class="progress__bar" id="progressBar" style="width:0%"></div>
+      </div>
 
-      for (const q of Object.keys(key)) {
-        const chosen = form.querySelector(`input[name="${q}"]:checked`);
-        if (chosen && chosen.value === key[q]) score++;
-      }
+      <div class="meta">
+        <span id="answeredMeta">0/3 beantwortet</span>
+        <span class="dot">•</span>
+        <span id="timeMeta" title="Zeit seit Öffnen">00:00</span>
+      </div>
+    </header>
 
-      const result = document.getElementById("result");
-      if (score === total) {
-        result.textContent = `✅ ${score}/${total} richtig – stark!`;
-      } else {
-        result.textContent = `➡️ ${score}/${total} richtig. Tipp: Schau dir das Hubble-Gesetz v = H0 · d nochmal an.`;
-      }
-    }
-  </script>
+    <section class="card">
+      <form id="quiz" novalidate>
+        <!-- Q1 -->
+        <article class="q" data-q="q1">
+          <div class="q__top">
+            <h2>1) Was beschreibt die Hubble-Konstante \(H_0\) am besten?</h2>
+            <div class="pill" id="pill-q1">offen</div>
+          </div>
+
+          <fieldset class="options" aria-label="Frage 1 Antworten">
+            <label class="opt">
+              <input type="radio" name="q1" value="a" />
+              <span class="opt__label">Die Temperatur der kosmischen Hintergrundstrahlung</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+
+            <label class="opt">
+              <input type="radio" name="q1" value="b" />
+              <span class="opt__label">Wie stark die Fluchtgeschwindigkeit mit der Entfernung zunimmt</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+
+            <label class="opt">
+              <input type="radio" name="q1" value="c" />
+              <span class="opt__label">Die Masse einer typischen Galaxie</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+          </fieldset>
+
+          <div class="feedback" id="fb-q1" aria-live="polite"></div>
+        </article>
+
+        <!-- Q2 -->
+        <article class="q" data-q="q2">
+          <div class="q__top">
+            <h2>2) Welche Beziehung passt zum Hubble-Gesetz?</h2>
+            <div class="pill" id="pill-q2">offen</div>
+          </div>
+
+          <fieldset class="options" aria-label="Frage 2 Antworten">
+            <label class="opt">
+              <input type="radio" name="q2" value="a" />
+              <span class="opt__label">\(v = H_0 \cdot d\)</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+
+            <label class="opt">
+              <input type="radio" name="q2" value="b" />
+              <span class="opt__label">\(d = H_0 \cdot v^2\)</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+
+            <label class="opt">
+              <input type="radio" name="q2" value="c" />
+              <span class="opt__label">\(v = \frac{d}{H_0^2}\)</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+          </fieldset>
+
+          <div class="feedback" id="fb-q2" aria-live="polite"></div>
+        </article>
+
+        <!-- Q3 -->
+        <article class="q" data-q="q3">
+          <div class="q__top">
+            <h2>3) Was bedeutet „kein Mittelpunkt der Expansion“ (Luftballon-Modell)?</h2>
+            <div class="pill" id="pill-q3">offen</div>
+          </div>
+
+          <fieldset class="options" aria-label="Frage 3 Antworten">
+            <label class="opt">
+              <input type="radio" name="q3" value="a" />
+              <span class="opt__label">Galaxien bewegen sich von einem Explosionszentrum weg</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+
+            <label class="opt">
+              <input type="radio" name="q3" value="b" />
+              <span class="opt__label">Der Raum dehnt sich aus; jeder Punkt sieht andere wegdriften</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+
+            <label class="opt">
+              <input type="radio" name="q3" value="c" />
+              <span class="opt__label">Nur unsere Galaxie bewegt sich, alle anderen stehen still</span>
+              <span class="opt__mark" aria-hidden="true"></span>
+            </label>
+          </fieldset>
+
+          <div class="feedback" id="fb-q3" aria-live="polite"></div>
+        </article>
+
+        <div class="actions">
+          <button type="button" class="btn btn--primary" id="gradeBtn">
+            <span class="btn__shine" aria-hidden="true"></span>
+            Auswerten
+          </button>
+
+          <button type="button" class="btn btn--ghost" id="resetBtn">
+            Zurücksetzen
+          </button>
+        </div>
+
+        <div class="result" id="result" aria-live="polite"></div>
+
+        <details class="hint">
+          <summary>Mini-Hinweis</summary>
+          <p>
+            Tipp: In einem Hubble-Diagramm entspricht die <b>Steigung</b> der Ausgleichsgeraden ungefähr \(H_0\).
+          </p>
+        </details>
+      </form>
+    </section>
+
+    <footer class="foot">
+      <span>© SchulQuiz • GitHub Pages</span>
+    </footer>
+  </main>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <script src="script.js"></script>
 </body>
 </html>
