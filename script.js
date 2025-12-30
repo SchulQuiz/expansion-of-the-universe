@@ -1,3 +1,30 @@
+// ================= FIREBASE INIT =================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCxUb8bdp-h4CTr4O3MdPvNPInOJjOi9oU",
+  authDomain: "schulquiz-3.firebaseapp.com",
+  projectId: "schulquiz-3",
+  storageBucket: "schulquiz-3.firebasestorage.app",
+  messagingSenderId: "45405696226",
+  appId: "1:45405696226:web:84de4d172c75957e892ebb",
+  measurementId: "G-D4Y5011FSD"
+};
+
+// Init
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Unsichtbar anmelden
+signInAnonymously(auth).catch(console.error);
+// =================================================
+
+
 // --- Quiz config (genau deine 3 Fragen, Antworten: b, a, b) ---
 const KEY = { q1: "b", q2: "a", q3: "b" };
 const EXPLAIN = {
@@ -136,14 +163,27 @@ if (nameInput){
 }
 updateStartState();
 
-startBtn.addEventListener("click", () => {
+startBtn.addEventListener("click", async () => {
   const name = normName(nameInput?.value);
-  if (!name || name.length < 2) return; // safety
+  if (!name || name.length < 2) return;
+
   sessionStorage.setItem("quiz_name", name);
+
+  // Firestore: neuen Versuch anlegen
+  const ref = await addDoc(collection(db, "attempts"), {
+    name,
+    startedAt: serverTimestamp(),
+    userAgent: navigator.userAgent
+  });
+  sessionStorage.setItem("attempt_id", ref.id);
+
+  // Analytics
+  logEvent(analytics, "quiz_start", { name });
 
   hasStartedOnce = true;
   unlockQuiz({ startNow: true });
 });
+
 
 
 // --- progress ---
@@ -198,7 +238,7 @@ function shake(el) {
   );
 }
 
-gradeBtn.addEventListener("click", () => {
+gradeBtn.addEventListener("click", async () => {
   // verify all answered
   let allAnswered = true;
   for (const q of QNAMES) {
@@ -220,7 +260,7 @@ gradeBtn.addEventListener("click", () => {
   let score = 0;
   for (const q of QNAMES) {
     const chosen = quizForm.querySelector(`input[name="${q}"]:checked`).value;
-    if (!gradedOnce) clearMarks(q); // first time cleanup
+    if (!gradedOnce) clearMarks(q);
     if (chosen === KEY[q]) score++;
   }
 
@@ -236,12 +276,27 @@ gradeBtn.addEventListener("click", () => {
 
   if (score === QNAMES.length) {
     showResult(`✅ ${score}/3 richtig – sehr gut!  (Zeit: ${used})`, "ok");
-    // confettiBurst();
     confettiRain(1400);
   } else {
     showResult(`➡️ ${score}/3 richtig. (Zeit: ${used})  Schau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
   }
+
+  // ---- Firestore + Analytics (unsichtbar im Hintergrund) ----
+  try {
+    const attemptId = sessionStorage.getItem("attempt_id");
+    if (attemptId) {
+      await updateDoc(doc(db, "attempts", attemptId), {
+        score,
+        timeMs: usedMs,
+        finishedAt: serverTimestamp()
+      });
+      logEvent(analytics, "quiz_finish", { score, time_ms: usedMs });
+    }
+  } catch (e) {
+    console.error("Firestore update failed:", e);
+  }
 });
+
 
 resetBtn.addEventListener("click", () => {
   // „Zurücksetzen“: alles löschen + Timer stoppen (Overlay kommt NICHT wieder)
