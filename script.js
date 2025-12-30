@@ -205,18 +205,18 @@ gradeBtn.addEventListener("click", () => {
 
 resetBtn.addEventListener("click", () => {
   // „Zurücksetzen“: alles löschen + Timer stoppen (Overlay kommt NICHT wieder)
-  resetAll({ showOverlay: false, restartTimer: false });
-});
-
-againBtn.addEventListener("click", () => {
-  // „Nochmal“: alles resetten + Timer direkt neu starten (Overlay bleibt weg)
   resetAll({ showOverlay: false, restartTimer: true });
 });
 
-againBtn.addEventListener("click", () => {
-  // „Nochmal“: alles zurücksetzen + Timer sofort neu starten (ohne Overlay)
-  resetAll({ showOverlay: false, restartTimer: true });
-});
+// againBtn.addEventListener("click", () => {
+//   // „Nochmal“: alles resetten + Timer direkt neu starten (Overlay bleibt weg)
+//   resetAll({ showOverlay: false, restartTimer: true });
+// });
+
+// againBtn.addEventListener("click", () => {
+//   // „Nochmal“: alles zurücksetzen + Timer sofort neu starten (ohne Overlay)
+//   resetAll({ showOverlay: false, restartTimer: true });
+// });
 
 function showResult(text, tone) {
   resultBox.textContent = text;
