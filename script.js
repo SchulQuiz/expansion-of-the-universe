@@ -167,22 +167,22 @@ startBtn.addEventListener("click", async () => {
   const name = normName(nameInput?.value);
   if (!name || name.length < 2) return;
 
-  sessionStorage.setItem("quiz_name", name);
+  try {
+    const ref = await addDoc(collection(db, "attempts"), {
+      name,
+      startedAt: serverTimestamp(),
+      userAgent: navigator.userAgent
+    });
+    sessionStorage.setItem("attempt_id", ref.id);
 
-  // Firestore: neuen Versuch anlegen
-  const ref = await addDoc(collection(db, "attempts"), {
-    name,
-    startedAt: serverTimestamp(),
-    userAgent: navigator.userAgent
-  });
-  sessionStorage.setItem("attempt_id", ref.id);
+    logEvent(analytics, "quiz_start", { name });
+    unlockQuiz({ startNow: true });
 
-  // Analytics
-  logEvent(analytics, "quiz_start", { name });
-
-  hasStartedOnce = true;
-  unlockQuiz({ startNow: true });
+  } catch (e) {
+    console.error("addDoc failed:", e);
+  }
 });
+
 
 
 
