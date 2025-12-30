@@ -153,7 +153,7 @@ function updateStartState(){
   const name = normName(nameInput?.value);
   const ok = name.length >= 2;
   startBtn.disabled = !ok;
-  if (nameHint) nameHint.textContent = ok ? "Alles klar – du kannst starten." : "Bitte Name eingeben, dann ist „Los“ aktiv.";
+  if (nameHint) nameHint.textContent = ok ? "Bist du bereit? Dann tippe auf Los" : "Bitte erst Namen eingeben";
 }
 if (nameInput){
   nameInput.addEventListener("input", updateStartState, { passive: true });
