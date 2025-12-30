@@ -150,6 +150,47 @@ body.is-locked .wrap, body.is-locked .wrap *{
   box-shadow: 0 28px 90px rgba(0,0,0,.55);
   padding: 16px 16px 14px;
 }
+
+/* --- Name input im Start-Overlay --- */
+.start__label{
+  display:block;
+  margin: 10px 0 6px;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.start__row{display:flex; gap:10px;}
+
+.start__input{
+  width:100%;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+  outline: none;
+  transition: border-color .18s var(--ease), background .18s var(--ease);
+}
+
+.start__input:focus{
+  border-color: rgba(6,182,212,.45);
+  background: rgba(0,0,0,.22);
+}
+
+.start__hint{
+  margin: 8px 0 12px;
+  color: rgba(255,255,255,.55);
+  font-size: .88rem;
+}
+
+/* Disabled state für Los-Button (nutzt dein bestehendes .btn Design) */
+.btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none !important;
+  filter:none !important;
+}
+
 .start__badge{
   display:inline-flex;
   padding: 6px 10px;

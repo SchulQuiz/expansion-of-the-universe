@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <title>Universum Quiz</title>
-  <link rel="icon" href="assets/imgae2.png" type="image/x-icon"/>
+  <link rel="icon" href="assets/imgae1.png" type="image/x-icon"/>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -22,7 +22,20 @@
       <!-- <div class="start__badge">Bereit?</div> -->
       <h2 class="start__title">Tippe auf <span class="accent">Los</span>, um zu starten</h2>
       <p class="start__text">Der Timer endet, wenn du auf Auswerten klickst.</p>
-      <button type="button" class="btn btn--primary start__btn" id="startBtn">
+      <label class="start__label" for="nameInput">Dein Name</label>
+      <div class="start__row">
+        <input
+          id="nameInput"
+          class="start__input"
+          type="text"
+          inputmode="text"
+          autocomplete="name"
+          placeholder="z.B. Max"
+          maxlength="24"
+        />
+      </div>
+      <p class="start__hint" id="nameHint">Name eingeben</p>
+      <button type="button" class="btn btn--primary start__btn" id="startBtn" disabled>
         <span class="btn__shine" aria-hidden="true"></span>
         Los
       </button>
@@ -150,9 +163,9 @@
             Zurücksetzen
           </button>
 
-          <button type="button" class="btn btn--ghost" id="againBtn" hidden>
+          <!-- <button type="button" class="btn btn--ghost" id="againBtn" hidden>
             Nochmal
-          </button>
+          </button> -->
         </div>
 
         <div class="result" id="result" aria-live="polite"></div>

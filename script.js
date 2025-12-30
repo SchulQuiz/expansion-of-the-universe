@@ -28,6 +28,20 @@ const timeMeta = document.getElementById("timeMeta");
 const startOverlay = document.getElementById("startOverlay");
 const startBtn = document.getElementById("startBtn");
 const againBtn = document.getElementById("againBtn");
+const nameInput = document.getElementById("nameInput");
+const nameHint = document.getElementById("nameHint");
+
+// --- shuffle answer options (per question) ---
+function shuffleChildren(parent) {
+  const kids = Array.from(parent.children);
+  for (let i = kids.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [kids[i], kids[j]] = [kids[j], kids[i]];
+  }
+  kids.forEach(k => parent.appendChild(k));
+}
+document.querySelectorAll(".options").forEach(shuffleChildren);
+
 
 const QNAMES = Object.keys(KEY);
 let gradedOnce = false;
@@ -80,6 +94,7 @@ function unlockQuiz({startNow}){
 
 function resetAll({showOverlay = false, restartTimer = false} = {}){
   quizForm.reset();
+  document.querySelectorAll(".options").forEach(shuffleChildren);
   for (const q of QNAMES) clearMarks(q);
   gradedOnce = false;
   hideResult();
@@ -102,10 +117,34 @@ function resetAll({showOverlay = false, restartTimer = false} = {}){
 timeMeta.textContent = "00:00";
 startOverlay.hidden = false;
 document.body.classList.add("is-locked");
+
+// Los ist erst aktiv, wenn Name vorhanden
+function normName(s){
+  return (s || "").trim().replace(/\s+/g, " ");
+}
+function updateStartState(){
+  const name = normName(nameInput?.value);
+  const ok = name.length >= 2;
+  startBtn.disabled = !ok;
+  if (nameHint) nameHint.textContent = ok ? "Alles klar – du kannst starten." : "Bitte Name eingeben, dann ist „Los“ aktiv.";
+}
+if (nameInput){
+  nameInput.addEventListener("input", updateStartState, { passive: true });
+  nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !startBtn.disabled) startBtn.click();
+  });
+}
+updateStartState();
+
 startBtn.addEventListener("click", () => {
+  const name = normName(nameInput?.value);
+  if (!name || name.length < 2) return; // safety
+  sessionStorage.setItem("quiz_name", name);
+
   hasStartedOnce = true;
   unlockQuiz({ startNow: true });
 });
+
 
 // --- progress ---
 function updateProgress() {
