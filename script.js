@@ -276,7 +276,7 @@ gradeBtn.addEventListener("click", async () => {
 
   if (score === QNAMES.length) {
     showResult(`✅ ${score}/3 richtig – sehr gut!  (Zeit: ${used})`, "ok");
-    confettiRain(1400);
+    window.confettiRain?.(1400);
   } else {
     showResult(`➡️ ${score}/3 richtig. (Zeit: ${used})  Schau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
   }
