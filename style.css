@@ -27,7 +27,7 @@ html::before{
   content:"";
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.22); /* Stärke nach Geschmack */
+  background: rgba(0,0,0,.20); /* Stärke nach Geschmack, ehemals 22 */
   pointer-events: none;
   z-index: 0; /* unter .wrap (z=1), über dem Body-Background */
 }
