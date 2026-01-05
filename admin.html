@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Admin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>Admin-Bereich</h1>
+      <p class="sub" id="adminHint">Lade…</p>
+    </header>
+
+    <section class="card">
+      <p id="status"></p>
+
+      <div class="actions">
+        <button class="btn btn--ghost" id="backBtn">Zurück zum Quiz</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    const isAdmin = sessionStorage.getItem("admin_mode") === "1";
+
+    const hint = document.getElementById("adminHint");
+    const status = document.getElementById("status");
+
+    if (!isAdmin) {
+      hint.textContent = "Kein Zugriff";
+      status.textContent =
+        "❌ Du bist nicht im Admin-Modus. Bitte starte das Quiz über das Namensfeld.";
+    } else {
+      hint.textContent = "Admin-Modus aktiv";
+      status.textContent =
+        "✅ Zugriff OK. Hier bauen wir gleich die Sonderfunktionen.";
+    }
+
+    document.getElementById("backBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("admin_mode");
+      location.href = "./index.html";
+    });
+  </script>
+</body>
+</html>
