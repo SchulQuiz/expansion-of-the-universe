@@ -198,7 +198,10 @@ function setHeroText({ title, sub }) {
 
 function renderQuestions(questions) {
   const container = document.getElementById("questions");
-  if (!container) throw new Error("Missing #questions container in HTML.");
+  if (!container) {
+    console.warn("Kein #questions-Container in der HTML gefunden – verwende vorhandenes HTML (fallback).");
+    return;
+  }
 
   container.innerHTML = "";
 
@@ -371,7 +374,7 @@ function unlockQuiz({startNow}){
   if (startNow) startTimer();
 }
 
-function resetAll({showOverlay = false, restartTimer = false} = {}){
+async function resetAll({showOverlay = false, restartTimer = false} = {}){
   quizForm.reset();
   await initQuizFromTxt();
 document.querySelectorAll(".options").forEach(shuffleChildren);
