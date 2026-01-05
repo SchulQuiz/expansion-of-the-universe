@@ -1,0 +1,30 @@
+# Quiz definition (einfach erweiterbar)
+TITLE: 5. Die Expansion des Universums
+SUB: 3 Fragen, pro Frage ist genau eine Antwort richtig.
+
+Q: Was beschreibt die Hubble-Konstante H0 am besten?
+A: Die Temperatur der kosmischen Hintergrundstrahlung
+B: Wie stark die Fluchtgeschwindigkeit mit der Entfernung zunimmt
+C: Die Masse einer typischen Galaxie
+CORRECT: B
+EXPLAIN_A: Nicht ganz: Das wäre kosmische Hintergrundstrahlung (CMB).
+EXPLAIN_B: Richtig: H0 sagt, wie stark v mit d zunimmt.
+EXPLAIN_C: Nicht ganz: H0 hat nichts mit der Masse einer Galaxie zu tun.
+
+Q: Welche Beziehung passt zum Hubble-Gesetz?
+A: \(v = H_0 \cdot d\)
+B: \(d = H_0 \cdot v^2\)
+C: \(v = \frac{d}{H_0^2}\)
+CORRECT: A
+EXPLAIN_A: Richtig: Hubble-Gesetz v = H0 · d.
+EXPLAIN_B: Nicht ganz: v^2 kommt hier nicht vor.
+EXPLAIN_C: Nicht ganz: Das wäre keine lineare Proportionalität.
+
+Q: Was bedeutet „kein Mittelpunkt der Expansion“ (Luftballon-Modell)?
+A: Galaxien bewegen sich von einem Explosionszentrum weg
+B: Der Raum dehnt sich aus; jeder Punkt sieht andere wegdriften
+C: Nur unsere Galaxie bewegt sich, alle anderen stehen still
+CORRECT: B
+EXPLAIN_A: Nicht ganz: Es ist keine Explosion von einem Zentrum.
+EXPLAIN_B: Richtig: Der Raum dehnt sich aus, es gibt keinen ausgezeichneten Mittelpunkt.
+EXPLAIN_C: Nicht ganz: Nicht nur wir bewegen uns – Abstände wachsen überall.
