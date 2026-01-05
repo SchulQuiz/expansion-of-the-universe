@@ -1,55 +1,82 @@
-<!doctype html>
-<html lang="de">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="color-scheme" content="dark light" />
-  <title>Admin Seite</title>
-  <link rel="icon" href="assets/image1.png" type="image/x-icon"/>
-  <link rel="stylesheet" href="style.css" />
-</head>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-<body>
-  <main class="wrap">
-    <header class="hero">
-      <h1>Admin-Bereich</h1>
-      <p class="sub" id="adminHint">Lade…</p>
-    </header>
+  // ===== Admin-Check =====
+  const isAdmin = sessionStorage.getItem("admin_mode") === "1";
 
-    <section class="card">
-      <p id="status"></p>
+  const hintEl = document.getElementById("adminHint");
+  const accessStatusEl = document.getElementById("accessStatus");
+  const backBtn = document.getElementById("backBtn");
 
-      <div class="actions">
-        <button class="btn btn--ghost" id="backBtn">Zurück zum Quiz</button>
-      </div>
-    </section>
-  </main>
+  const quizTxtEl = document.getElementById("quizTxt");
+  const loadBtn = document.getElementById("loadBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  const saveStatusEl = document.getElementById("saveStatus");
 
-  <script type="module">
-    const isAdmin = sessionStorage.getItem("admin_mode") === "1";
+  backBtn.addEventListener("click", () => {
+    sessionStorage.removeItem("admin_mode");
+    location.href = "./index.html";
+  });
 
-    const hint = document.getElementById("adminHint");
-    const status = document.getElementById("status");
+  if (!isAdmin) {
+    hintEl.textContent = "Kein Zugriff";
+    accessStatusEl.textContent =
+      "❌ Du bist nicht im Admin-Modus. Bitte starte über das Namensfeld mit dem Code.";
 
-    if (!isAdmin) {
-      hint.textContent = "Kein Zugriff";
-      status.textContent =
-        "❌ Du bist nicht im Admin-Modus. Bitte starte über das Namensfeld mit dem Code.";
-    } else {
-      hint.textContent = "Admin-Modus aktiv";
-      status.textContent =
-        "✅ Zugriff OK. Hier bauen wir gleich die Sonderfunktionen.";
+    quizTxtEl.disabled = true;
+    loadBtn.disabled = true;
+    saveBtn.disabled = true;
+    throw new Error("Not in admin_mode"); // Script hier bewusst beenden
+  }
+
+  hintEl.textContent = "Admin-Modus aktiv";
+  accessStatusEl.textContent = "✅ Zugriff OK. Quiz kann bearbeitet werden.";
+
+  // ===== Firebase =====
+  const firebaseConfig = {
+    apiKey: "...",
+    authDomain: "...",
+    projectId: "...",
+    storageBucket: "...",
+    messagingSenderId: "...",
+    appId: "...",
+    measurementId: "..."
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const setSaveStatus = (t) => (saveStatusEl.textContent = t);
+
+  async function loadCurrent() {
+    const snap = await getDoc(doc(db, "quizzes", "current"));
+    if (!snap.exists()) {
+      quizTxtEl.value = "TITLE: ...\nSUB: ...\n\nQ: ...";
+      setSaveStatus("Noch nichts gespeichert.");
+      return;
+    }
+    quizTxtEl.value = snap.data().txt || "";
+    setSaveStatus("Geladen ✅");
+  }
+
+  async function saveCurrent() {
+    const txt = String(quizTxtEl.value || "");
+    if (!txt.includes("TITLE:") || !txt.includes("Q:") || !txt.includes("CORRECT:")) {
+      setSaveStatus("❌ Ungültiges Quiz-TXT.");
+      return;
     }
 
-    document.getElementById("backBtn").addEventListener("click", () => {
-      sessionStorage.removeItem("admin_mode");
-      location.href = "./index.html";
-    });
-  </script>
-</body>
-<div class="bg">
-  <div class="glow g1" aria-hidden="true"></div>
-  <div class="glow g2" aria-hidden="true"></div>
-  <div class="glow g3" aria-hidden="true"></div>
-</div>
-</html>
+    await setDoc(doc(db, "quizzes", "current"), {
+      txt,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    setSaveStatus("Gespeichert ✅");
+  }
+
+  loadBtn.addEventListener("click", loadCurrent);
+  saveBtn.addEventListener("click", saveCurrent);
+
+  loadCurrent();
+</script>

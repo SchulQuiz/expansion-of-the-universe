@@ -1,7 +1,7 @@
 // ================= FIREBASE INIT =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, updateDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
 
 const firebaseConfig = {
@@ -279,15 +279,29 @@ function buildRuntimeKeyExplain(questions) {
   return { key, explain, qnames: Object.keys(key) };
 }
 
+async function loadQuizTxtFromFirestore() {
+  const snap = await getDoc(doc(db, "quizzes", "current"));
+  if (!snap.exists()) throw new Error("quizzes/current fehlt");
+  const data = snap.data();
+  if (!data.txt || typeof data.txt !== "string") throw new Error("Feld txt fehlt");
+  return data.txt;
+}
+
 async function initQuizFromTxt() {
   let def = null;
 
   try {
-    const txt = await loadQuizTxt(QUIZ_TXT_PATH);
+    const txt = await loadQuizTxtFromFirestore();   // 1) online
     def = parseQuizTxt(txt);
   } catch (e) {
-    console.warn("Quiz TXT konnte nicht geladen/geparst werden – benutze Fallback.", e);
-    def = DEFAULT_QUIZ;
+    console.warn("Firestore TXT failed – fallback to assets/quiz.txt", e);
+    try {
+      const txt = await loadQuizTxt(QUIZ_TXT_PATH); // 2) lokal fallback
+      def = parseQuizTxt(txt);
+    } catch (e2) {
+      console.warn("assets TXT failed – fallback DEFAULT_QUIZ", e2);
+      def = DEFAULT_QUIZ;                           // 3) letzter fallback
+    }
   }
 
   setHeroText(def);
@@ -298,6 +312,7 @@ async function initQuizFromTxt() {
   EXPLAIN = runtime.explain;
   QNAMES = runtime.qnames;
 }
+
 // ==========================================================================
 
 const quizForm = document.getElementById("quiz");
