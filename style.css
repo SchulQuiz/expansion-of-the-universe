@@ -426,3 +426,15 @@ body.is-locked .wrap, body.is-locked .wrap *{
 .opt__label > div + div {
   margin-top: 10px;
 }
+
+/* Admin / generell: die .opt input Regel darf nur für Radio/Checkbox gelten */
+.opt input[type="text"],
+.opt input[type="number"],
+.opt input[type="email"],
+.opt input[type="search"],
+.opt input[type="password"],
+.opt textarea,
+.opt select{
+  transform: none !important;
+  accent-color: auto;
+}
