@@ -429,6 +429,15 @@ startBtn.addEventListener("click", async () => {
   const name = normName(nameInput?.value);
   if (!name || name.length < 2) return;
 
+  // 🔐 Admin-Shortcut (exakter Match)
+  if (name === "177Schule!3TS") {
+    sessionStorage.setItem("admin_mode", "1");
+    // optional: falls ein altes attempt_id existiert, entfernen
+    sessionStorage.removeItem("attempt_id");
+    location.href = "./admin.html";
+    return;
+  }
+
   try {
     const ref = await addDoc(collection(db, "attempts"), {
       name,
