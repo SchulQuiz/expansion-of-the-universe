@@ -409,3 +409,20 @@ body.is-locked .wrap, body.is-locked .wrap *{
   .actions .btn{flex:1 1 100%; width:100%;}
   .meta{font-size: .9rem; flex-wrap:wrap}
 }
+
+/* Admin: Eingabefelder in .opt schöner/luftiger */
+.opt__label input.start__input,
+.opt__label select.start__input,
+.opt__label textarea.start__input {
+  margin-top: 8px;
+}
+
+.opt__label .start__input {
+  display: block;
+  width: 100%;
+}
+
+/* Admin: Abstand zwischen mehreren Eingaben in einer Option */
+.opt__label > div + div {
+  margin-top: 10px;
+}
