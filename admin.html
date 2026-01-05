@@ -46,6 +46,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
     // ===== Admin-Check =====
     const isAdmin = sessionStorage.getItem("admin_mode") === "1";
@@ -95,6 +96,9 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    
+    const auth = getAuth(app);
+    await signInAnonymously(auth).catch(console.error);
 
     // ===== TXT Parser (gleiche Logik wie Hauptseite, minimal kopiert) =====
     function parseQuizTxt(txt) {
