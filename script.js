@@ -371,7 +371,7 @@ function unlockQuiz({startNow}){
   if (startNow) startTimer();
 }
 
-async function resetAll({showOverlay = false, restartTimer = false} = {}){
+function resetAll({showOverlay = false, restartTimer = false} = {}){
   quizForm.reset();
   await initQuizFromTxt();
 document.querySelectorAll(".options").forEach(shuffleChildren);
