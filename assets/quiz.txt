@@ -13,8 +13,8 @@ EXPLAIN_C: Nicht ganz: H0 hat nichts mit der Masse einer Galaxie zu tun.
 
 Q: Welche Beziehung passt zum Hubble-Gesetz?
 A: v = H * d
-B: \(d = H_0 \cdot v^2\)
-C: \(v = \frac{d}{H_0^2}\)
+B: d = H_0 \cdot v^2\)
+C: v = d / H^2
 CORRECT: A
 EXPLAIN_A: Richtig: Hubble-Gesetz v = H0 · d.
 EXPLAIN_B: Nicht ganz: v^2 kommt hier nicht vor.
