@@ -448,6 +448,7 @@ updateStartState();
 
 startBtn.addEventListener("click", async () => {
   const raw = nameInput?.value ?? "";
+  const name = raw.trim();
   const entered = normCode(raw);
   const admin = normCode(ADMIN_CODE);
 

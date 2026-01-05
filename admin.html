@@ -16,105 +16,424 @@
     </header>
 
     <section class="card">
-      <p id="accessStatus"></p>
+      <div class="meta" style="justify-content:space-between; flex-wrap:wrap;">
+        <span id="accessStatus"></span>
+        <span id="saveStatus"></span>
+      </div>
 
       <div class="actions">
         <button class="btn btn--ghost" id="backBtn">Zurück zum Quiz</button>
+        <button class="btn btn--ghost" id="reloadBtn">Neu laden</button>
+        <button class="btn btn--primary" id="saveBtn">
+          <span class="btn__shine" aria-hidden="true"></span>
+          Speichern
+        </button>
       </div>
+
+      <div class="actions">
+        <button class="btn btn--ghost" id="addQuestionBtn">+ Frage hinzufügen</button>
+      </div>
+
+      <div id="editor"></div>
+
+      <details class="hint" style="margin-top:14px;">
+        <summary>TXT-Ansicht (optional)</summary>
+        <textarea id="txtView" style="width:100%;height:40vh;margin-top:10px;"></textarea>
+      </details>
     </section>
   </main>
 
-  <!-- Editor UI -->
-  <textarea id="quizTxt" style="width:100%;height:60vh;"></textarea>
-  <div style="margin-top:10px;display:flex;gap:10px;">
-    <button id="loadBtn">Laden</button>
-    <button id="saveBtn">Speichern</button>
-  </div>
-  <p id="saveStatus"></p>
-
-  <!-- Zugriff / UI-Text -->
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ===== Admin-Check =====
-  const isAdmin = sessionStorage.getItem("admin_mode") === "1";
+    // ===== Admin-Check =====
+    const isAdmin = sessionStorage.getItem("admin_mode") === "1";
 
-  const hintEl = document.getElementById("adminHint");
-  const accessStatusEl = document.getElementById("accessStatus");
-  const backBtn = document.getElementById("backBtn");
+    const hintEl = document.getElementById("adminHint");
+    const accessStatusEl = document.getElementById("accessStatus");
+    const saveStatusEl = document.getElementById("saveStatus");
 
-  const quizTxtEl = document.getElementById("quizTxt");
-  const loadBtn = document.getElementById("loadBtn");
-  const saveBtn = document.getElementById("saveBtn");
-  const saveStatusEl = document.getElementById("saveStatus");
+    const backBtn = document.getElementById("backBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const addQuestionBtn = document.getElementById("addQuestionBtn");
 
-  backBtn.addEventListener("click", () => {
-    sessionStorage.removeItem("admin_mode");
-    location.href = "./index.html";
-  });
+    const editorEl = document.getElementById("editor");
+    const txtViewEl = document.getElementById("txtView");
 
-  if (!isAdmin) {
-    hintEl.textContent = "Kein Zugriff";
-    accessStatusEl.textContent =
-      "❌ Du bist nicht im Admin-Modus. Bitte starte über das Namensfeld mit dem Code.";
+    const setSaveStatus = (t) => saveStatusEl.textContent = t;
 
-    quizTxtEl.disabled = true;
-    loadBtn.disabled = true;
-    saveBtn.disabled = true;
-    throw new Error("Not in admin_mode"); // Script hier bewusst beenden
-  }
+    backBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("admin_mode");
+      location.href = "./index.html";
+    });
 
-  hintEl.textContent = "Admin-Modus aktiv";
-  accessStatusEl.textContent = "✅ Zugriff OK. Quiz kann bearbeitet werden.";
-
-  // ===== Firebase =====
-  const firebaseConfig = {
-    apiKey: "...",
-    authDomain: "...",
-    projectId: "...",
-    storageBucket: "...",
-    messagingSenderId: "...",
-    appId: "...",
-    measurementId: "..."
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  const setSaveStatus = (t) => (saveStatusEl.textContent = t);
-
-  async function loadCurrent() {
-    const snap = await getDoc(doc(db, "quizzes", "current"));
-    if (!snap.exists()) {
-      quizTxtEl.value = "TITLE: ...\nSUB: ...\n\nQ: ...";
-      setSaveStatus("Noch nichts gespeichert.");
-      return;
-    }
-    quizTxtEl.value = snap.data().txt || "";
-    setSaveStatus("Geladen ✅");
-  }
-
-  async function saveCurrent() {
-    const txt = String(quizTxtEl.value || "");
-    if (!txt.includes("TITLE:") || !txt.includes("Q:") || !txt.includes("CORRECT:")) {
-      setSaveStatus("❌ Ungültiges Quiz-TXT.");
-      return;
+    if (!isAdmin) {
+      hintEl.textContent = "Kein Zugriff";
+      accessStatusEl.textContent = "❌ Kein Admin-Modus. Starte über Code im Namensfeld.";
+      reloadBtn.disabled = true;
+      saveBtn.disabled = true;
+      addQuestionBtn.disabled = true;
+      throw new Error("Not in admin_mode");
     }
 
-    await setDoc(doc(db, "quizzes", "current"), {
-      txt,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    hintEl.textContent = "Admin-Modus aktiv";
+    accessStatusEl.textContent = "✅ Zugriff OK";
 
-    setSaveStatus("Gespeichert ✅");
-  }
+    // ===== Firebase =====
+    // Nimm exakt dieselbe firebaseConfig wie in script.js (Hauptseite).
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxUb8bdp-h4CTr4O3MdPvNPInOJjOi9oU",
+      authDomain: "schulquiz-3.firebaseapp.com",
+      projectId: "schulquiz-3",
+      storageBucket: "schulquiz-3.firebasestorage.app",
+      messagingSenderId: "45405696226",
+      appId: "1:45405696226:web:84de4d172c75957e892ebb",
+      measurementId: "G-D4Y5011FSD"
+    };
 
-  loadBtn.addEventListener("click", loadCurrent);
-  saveBtn.addEventListener("click", saveCurrent);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  loadCurrent();
-</script>
+    // ===== TXT Parser (gleiche Logik wie Hauptseite, minimal kopiert) =====
+    function parseQuizTxt(txt) {
+      const out = { title: null, sub: null, questions: [] };
+      const lines = String(txt || "").replace(/\r\n/g, "\n").split("\n");
+      let cur = null;
 
+      function pushCur() {
+        if (!cur) return;
+        const optKeys = Object.keys(cur.options || {});
+        if (!cur.text || optKeys.length < 2 || !cur.correct) throw new Error("Invalid question block.");
+        if (!cur.options[cur.correct]) throw new Error(`Correct option '${cur.correct}' not found.`);
+        cur.explain = cur.explain || {};
+        for (const k of optKeys) if (!cur.explain[k]) cur.explain[k] = "Danke! Schau dir die Lösung an.";
+        out.questions.push(cur);
+        cur = null;
+      }
+
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line || line.startsWith("#")) continue;
+
+        const mTitle = line.match(/^TITLE\s*:\s*(.+)$/i);
+        if (mTitle) { out.title = mTitle[1].trim(); continue; }
+
+        const mSub = line.match(/^SUB\s*:\s*(.+)$/i);
+        if (mSub) { out.sub = mSub[1].trim(); continue; }
+
+        const mQ = line.match(/^Q\s*:\s*(.+)$/i);
+        if (mQ) { pushCur(); cur = { text: mQ[1].trim(), options: {}, correct: null, explain: {} }; continue; }
+
+        if (!cur) continue;
+
+        const mOpt = line.match(/^([A-Z])\s*:\s*(.+)$/);
+        if (mOpt) { cur.options[mOpt[1].toLowerCase()] = mOpt[2].trim(); continue; }
+
+        const mCorrect = line.match(/^CORRECT\s*:\s*([A-Z])\s*$/i);
+        if (mCorrect) { cur.correct = mCorrect[1].toLowerCase(); continue; }
+
+        const mExplain = line.match(/^EXPLAIN_([A-Z])\s*:\s*(.+)$/i);
+        if (mExplain) { cur.explain[mExplain[1].toLowerCase()] = mExplain[2].trim(); continue; }
+      }
+
+      pushCur();
+      if (!out.questions.length) throw new Error("No questions found.");
+      return out;
+    }
+
+    function buildQuizTxt(state) {
+      const lines = [];
+      lines.push(`TITLE: ${state.title || ""}`.trim());
+      lines.push(`SUB: ${state.sub || ""}`.trim());
+      lines.push("");
+
+      state.questions.forEach((q) => {
+        lines.push(`Q: ${q.text || ""}`.trim());
+        const keys = Object.keys(q.options || {}).sort();
+        keys.forEach((k) => lines.push(`${k.toUpperCase()}: ${q.options[k] || ""}`.trim()));
+        lines.push(`CORRECT: ${(q.correct || "a").toUpperCase()}`);
+        keys.forEach((k) => {
+          const exp = (q.explain && q.explain[k]) ? q.explain[k] : "";
+          lines.push(`EXPLAIN_${k.toUpperCase()}: ${exp}`.trim());
+        });
+        lines.push("");
+      });
+
+      return lines.join("\n").trim() + "\n";
+    }
+
+    // ===== State =====
+    let state = {
+      title: "",
+      sub: "",
+      questions: []
+    };
+
+    function nextOptionKey(existingKeys) {
+      const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+      for (const k of alphabet) if (!existingKeys.includes(k)) return k;
+      return "z";
+    }
+
+    function render() {
+      editorEl.innerHTML = "";
+
+      // Header edit (Title/Sub) im gleichen Look
+      const headerCard = document.createElement("article");
+      headerCard.className = "q";
+      headerCard.innerHTML = `
+        <div class="q__top">
+          <h2>Quiz Kopf</h2>
+          <div class="pill">online</div>
+        </div>
+
+        <div class="options">
+          <label class="opt" style="cursor:default;">
+            <span class="opt__label" style="display:block;width:100%;">
+              <div style="font-weight:650; margin-bottom:6px;">TITLE</div>
+              <input id="titleInput" class="start__input" style="width:100%;" type="text" />
+            </span>
+          </label>
+
+          <label class="opt" style="cursor:default;">
+            <span class="opt__label" style="display:block;width:100%;">
+              <div style="font-weight:650; margin-bottom:6px;">SUB</div>
+              <input id="subInput" class="start__input" style="width:100%;" type="text" />
+            </span>
+          </label>
+        </div>
+      `;
+      editorEl.appendChild(headerCard);
+
+      headerCard.querySelector("#titleInput").value = state.title;
+      headerCard.querySelector("#subInput").value = state.sub;
+
+      headerCard.querySelector("#titleInput").addEventListener("input", (e) => {
+        state.title = e.target.value;
+        syncTxtView();
+      }, { passive: true });
+
+      headerCard.querySelector("#subInput").addEventListener("input", (e) => {
+        state.sub = e.target.value;
+        syncTxtView();
+      }, { passive: true });
+
+      // Questions
+      state.questions.forEach((q, idx) => {
+        const qEl = document.createElement("article");
+        qEl.className = "q";
+
+        const optKeys = Object.keys(q.options || {}).sort();
+
+        qEl.innerHTML = `
+          <div class="q__top">
+            <h2>${idx + 1}) Frage</h2>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <div class="pill">edit</div>
+              <button type="button" class="btn btn--ghost" data-action="delQ" data-idx="${idx}">Löschen</button>
+            </div>
+          </div>
+
+          <div class="options">
+            <label class="opt" style="cursor:default;">
+              <span class="opt__label" style="display:block;width:100%;">
+                <div style="font-weight:650; margin-bottom:6px;">Q</div>
+                <input class="start__input" style="width:100%;" type="text" data-field="qtext" data-idx="${idx}" />
+              </span>
+            </label>
+
+            <label class="opt" style="cursor:default;">
+              <span class="opt__label" style="display:block;width:100%;">
+                <div style="font-weight:650; margin-bottom:6px;">CORRECT</div>
+                <select class="start__input" style="width:100%;" data-field="correct" data-idx="${idx}"></select>
+              </span>
+            </label>
+          </div>
+
+          <div class="feedback" style="margin-top:8px;">Optionen & Erklärungen</div>
+          <div class="options" data-opts="${idx}"></div>
+
+          <div class="actions">
+            <button type="button" class="btn btn--ghost" data-action="addOpt" data-idx="${idx}">+ Option</button>
+          </div>
+        `;
+
+        editorEl.appendChild(qEl);
+
+        // set Q text
+        qEl.querySelector(`[data-field="qtext"][data-idx="${idx}"]`).value = q.text || "";
+        qEl.querySelector(`[data-field="qtext"][data-idx="${idx}"]`).addEventListener("input", (e) => {
+          state.questions[idx].text = e.target.value;
+          syncTxtView();
+        }, { passive: true });
+
+        // correct select
+        const sel = qEl.querySelector(`select[data-field="correct"][data-idx="${idx}"]`);
+        sel.innerHTML = optKeys.map(k => `<option value="${k}">${k.toUpperCase()}</option>`).join("");
+        sel.value = q.correct || optKeys[0] || "a";
+        sel.addEventListener("change", (e) => {
+          state.questions[idx].correct = e.target.value;
+          syncTxtView();
+        });
+
+        // options block
+        const optsWrap = qEl.querySelector(`[data-opts="${idx}"]`);
+        optsWrap.innerHTML = "";
+
+        optKeys.forEach((k) => {
+          const row = document.createElement("div");
+          row.className = "opt";
+          row.style.cursor = "default";
+          row.innerHTML = `
+            <span class="opt__label" style="width:100%; display:block;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="font-weight:650;">${k.toUpperCase()}</div>
+                <button type="button" class="btn btn--ghost" data-action="delOpt" data-idx="${idx}" data-k="${k}">Entfernen</button>
+              </div>
+
+              <div style="margin-top:8px;">
+                <div style="font-size:.9rem; color:rgba(255,255,255,.7); margin-bottom:6px;">Text</div>
+                <input class="start__input" style="width:100%;" type="text" data-field="optText" data-idx="${idx}" data-k="${k}" />
+              </div>
+
+              <div style="margin-top:10px;">
+                <div style="font-size:.9rem; color:rgba(255,255,255,.7); margin-bottom:6px;">EXPLAIN_${k.toUpperCase()}</div>
+                <input class="start__input" style="width:100%;" type="text" data-field="optExplain" data-idx="${idx}" data-k="${k}" />
+              </div>
+            </span>
+          `;
+          optsWrap.appendChild(row);
+
+          // fill + listeners
+          row.querySelector(`[data-field="optText"][data-idx="${idx}"][data-k="${k}"]`).value = q.options[k] || "";
+          row.querySelector(`[data-field="optExplain"][data-idx="${idx}"][data-k="${k}"]`).value = (q.explain && q.explain[k]) ? q.explain[k] : "";
+
+          row.querySelector(`[data-field="optText"]`).addEventListener("input", (e) => {
+            state.questions[idx].options[k] = e.target.value;
+            syncTxtView();
+          }, { passive: true });
+
+          row.querySelector(`[data-field="optExplain"]`).addEventListener("input", (e) => {
+            state.questions[idx].explain = state.questions[idx].explain || {};
+            state.questions[idx].explain[k] = e.target.value;
+            syncTxtView();
+          }, { passive: true });
+        });
+      });
+
+      // delete/add handlers via delegation
+      editorEl.querySelectorAll(`[data-action="delQ"]`).forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.idx);
+          state.questions.splice(i, 1);
+          render();
+          syncTxtView();
+        });
+      });
+
+      editorEl.querySelectorAll(`[data-action="addOpt"]`).forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.idx);
+          const q = state.questions[i];
+          const keys = Object.keys(q.options || {});
+          const nk = nextOptionKey(keys);
+          q.options[nk] = "";
+          q.explain = q.explain || {};
+          q.explain[nk] = "";
+          if (!q.correct) q.correct = nk;
+          render();
+          syncTxtView();
+        });
+      });
+
+      editorEl.querySelectorAll(`[data-action="delOpt"]`).forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.idx);
+          const k = btn.dataset.k;
+          const q = state.questions[i];
+
+          delete q.options[k];
+          if (q.explain) delete q.explain[k];
+
+          const keys = Object.keys(q.options || {}).sort();
+          if (q.correct === k) q.correct = keys[0] || "a";
+
+          render();
+          syncTxtView();
+        });
+      });
+    }
+
+    function syncTxtView() {
+      txtViewEl.value = buildQuizTxt(state);
+      setSaveStatus("✳️ Ungespeichert");
+    }
+
+    function addQuestion() {
+      state.questions.push({
+        text: "",
+        options: { a: "", b: "", c: "" },
+        correct: "a",
+        explain: { a: "", b: "", c: "" }
+      });
+      render();
+      syncTxtView();
+      editorEl.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+
+    addQuestionBtn.addEventListener("click", addQuestion);
+
+    async function loadCurrent() {
+      setSaveStatus("Lade…");
+      const snap = await getDoc(doc(db, "quizzes", "current"));
+      if (!snap.exists() || typeof snap.data().txt !== "string") {
+        // Startzustand: leeres Quiz
+        state = { title: "Neues Quiz", sub: "…", questions: [] };
+        render();
+        syncTxtView();
+        setSaveStatus("Noch kein TXT gefunden – neuer Entwurf.");
+        return;
+      }
+
+      const txt = snap.data().txt;
+      const parsed = parseQuizTxt(txt);
+      state = {
+        title: parsed.title || "",
+        sub: parsed.sub || "",
+        questions: parsed.questions || []
+      };
+
+      render();
+      txtViewEl.value = txt; // exakt laden
+      setSaveStatus("Geladen ✅");
+    }
+
+    async function saveCurrent() {
+      try {
+        const txt = buildQuizTxt(state);
+        // kurzer sanity check: parse muss durchlaufen (damit Hauptseite garantiert klappt)
+        parseQuizTxt(txt);
+
+        await setDoc(doc(db, "quizzes", "current"), {
+          txt,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        txtViewEl.value = txt;
+        setSaveStatus("Gespeichert ✅");
+      } catch (e) {
+        console.error(e);
+        setSaveStatus("❌ Speichern fehlgeschlagen (siehe Konsole)");
+      }
+    }
+
+    reloadBtn.addEventListener("click", loadCurrent);
+    saveBtn.addEventListener("click", saveCurrent);
+
+    // Auto-Fetch beim Öffnen
+    loadCurrent();
+  </script>
 </body>
 </html>
