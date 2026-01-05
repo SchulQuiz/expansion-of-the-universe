@@ -418,7 +418,7 @@ function normCode(s){
 const ADMIN_CODE = "Schule3";
 
 function updateStartState(){
-  const name = normName(nameInput?.value);
+  const name = normCode(nameInput?.value);
   const ok = name.length >= 2;
   startBtn.disabled = !ok;
   if (nameHint) nameHint.textContent = ok ? "Bist du bereit? Dann tippe auf Los" : "Bitte erst Namen eingeben";
@@ -435,10 +435,6 @@ startBtn.addEventListener("click", async () => {
   const raw = nameInput?.value ?? "";
   const entered = normCode(raw);
   const admin = normCode(ADMIN_CODE);
-
-  console.log("RAW:", JSON.stringify(nameInput.value));
-  console.log("NORM:", JSON.stringify(normName(nameInput.value)));
-  console.log("MATCH?", normName(nameInput.value) === "177Schule!3TS"); // logging gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 
   if (entered === admin) {
     sessionStorage.setItem("admin_mode", "1");
