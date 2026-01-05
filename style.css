@@ -14,6 +14,24 @@
 
 *{box-sizing:border-box}
 html,body{height:100%}
+
+
+html, body { background: #000; }
+
+/* Always-on dim overlay that stays correct on mobile scroll */
+html{
+  position: relative;
+}
+
+html::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.22); /* Stärke nach Geschmack */
+  pointer-events: none;
+  z-index: 0; /* unter .wrap (z=1), über dem Body-Background */
+}
+
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
@@ -23,6 +41,7 @@ body{
               linear-gradient(180deg, var(--bg1), var(--bg2));
   overflow-x:hidden;
 }
+
 
 /* soft animated glow blobs */
 .bg{position:fixed; inset:0; pointer-events:none; z-index:0}
