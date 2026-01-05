@@ -436,6 +436,10 @@ startBtn.addEventListener("click", async () => {
   const entered = normCode(raw);
   const admin = normCode(ADMIN_CODE);
 
+  console.log("RAW:", JSON.stringify(nameInput.value));
+  console.log("NORM:", JSON.stringify(normName(nameInput.value)));
+  console.log("MATCH?", normName(nameInput.value) === "177Schule!3TS"); // logging gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
   if (entered === admin) {
     sessionStorage.setItem("admin_mode", "1");
     sessionStorage.removeItem("attempt_id");
