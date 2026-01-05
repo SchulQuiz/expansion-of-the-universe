@@ -60,7 +60,7 @@
       </div>
 
       <div class="meta">
-        <span id="answeredMeta">0/3 beantwortet</span>
+        <span id="answeredMeta">0/0 beantwortet</span>
         <span class="dot">•</span>
         <span id="timeMeta" title="Zeit seit Öffnen">00:00</span>
       </div>
@@ -68,95 +68,7 @@
 
     <section class="card">
       <form id="quiz" novalidate>
-        <!-- Q1 -->
-        <article class="q" data-q="q1">
-          <div class="q__top">
-            <h2>1) Was beschreibt die Hubble-Konstante H0 am besten?</h2>
-            <div class="pill" id="pill-q1">offen</div>
-          </div>
-
-          <fieldset class="options" aria-label="Frage 1 Antworten">
-            <label class="opt">
-              <input type="radio" name="q1" value="a" />
-              <span class="opt__label">Die Temperatur der kosmischen Hintergrundstrahlung</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-
-            <label class="opt">
-              <input type="radio" name="q1" value="b" />
-              <span class="opt__label">Wie stark die Fluchtgeschwindigkeit mit der Entfernung zunimmt</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-
-            <label class="opt">
-              <input type="radio" name="q1" value="c" />
-              <span class="opt__label">Die Masse einer typischen Galaxie</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-          </fieldset>
-
-          <div class="feedback" id="fb-q1" aria-live="polite"></div>
-        </article>
-
-        <!-- Q2 -->
-        <article class="q" data-q="q2">
-          <div class="q__top">
-            <h2>2) Welche Beziehung passt zum Hubble-Gesetz?</h2>
-            <div class="pill" id="pill-q2">offen</div>
-          </div>
-
-          <fieldset class="options" aria-label="Frage 2 Antworten">
-            <label class="opt">
-              <input type="radio" name="q2" value="a" />
-              <span class="opt__label">\(v = H_0 \cdot d\)</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-
-            <label class="opt">
-              <input type="radio" name="q2" value="b" />
-              <span class="opt__label">\(d = H_0 \cdot v^2\)</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-
-            <label class="opt">
-              <input type="radio" name="q2" value="c" />
-              <span class="opt__label">\(v = \frac{d}{H_0^2}\)</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-          </fieldset>
-
-          <div class="feedback" id="fb-q2" aria-live="polite"></div>
-        </article>
-
-        <!-- Q3 -->
-        <article class="q" data-q="q3">
-          <div class="q__top">
-            <h2>3) Was bedeutet „kein Mittelpunkt der Expansion“ (Luftballon-Modell)?</h2>
-            <div class="pill" id="pill-q3">offen</div>
-          </div>
-
-          <fieldset class="options" aria-label="Frage 3 Antworten">
-            <label class="opt">
-              <input type="radio" name="q3" value="a" />
-              <span class="opt__label">Galaxien bewegen sich von einem Explosionszentrum weg</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-
-            <label class="opt">
-              <input type="radio" name="q3" value="b" />
-              <span class="opt__label">Der Raum dehnt sich aus; jeder Punkt sieht andere wegdriften</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-
-            <label class="opt">
-              <input type="radio" name="q3" value="c" />
-              <span class="opt__label">Nur unsere Galaxie bewegt sich, alle anderen stehen still</span>
-              <span class="opt__mark" aria-hidden="true"></span>
-            </label>
-          </fieldset>
-
-          <div class="feedback" id="fb-q3" aria-live="polite"></div>
-        </article>
+                <div id="questions"></div>
 
         <div class="actions">
           <button type="button" class="btn btn--primary" id="gradeBtn">

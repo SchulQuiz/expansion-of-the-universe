@@ -25,25 +25,277 @@ await signInAnonymously(auth).catch(console.error);
 // =================================================
 
 
-// --- Quiz config (genau deine 3 Fragen, Antworten: b, a, b) ---
-const KEY = { q1: "b", q2: "a", q3: "b" };
-const EXPLAIN = {
-  q1: {
-    a: "Nicht ganz: Das wäre kosmische Hintergrundstrahlung (CMB).",
-    b: "Richtig: H0 sagt, wie stark v mit d zunimmt.",
-    c: "Nicht ganz: H0 hat nichts mit der Masse einer Galaxie zu tun."
-  },
-  q2: {
-    a: "Richtig: Hubble-Gesetz v = H0 · d.",
-    b: "Nicht ganz: v^2 kommt hier nicht vor.",
-    c: "Nicht ganz: Das wäre keine lineare Proportionalität."
-  },
-  q3: {
-    a: "Nicht ganz: Es ist keine Explosion von einem Zentrum.",
-    b: "Richtig: Der Raum dehnt sich aus, es gibt keinen ausgezeichneten Mittelpunkt.",
-    c: "Nicht ganz: Nicht nur wir bewegen uns – Abstände wachsen überall."
-  }
+// ================= QUIZ LOADING (from assets/quiz.txt) =================
+const QUIZ_TXT_PATH = "assets/quiz.txt";
+
+/**
+ * Parsed runtime quiz state:
+ * KEY: { q1: "b", ... }
+ * EXPLAIN: { q1: { a:"...", b:"...", ... }, ... }
+ * QNAMES: ["q1","q2",...]
+ */
+let KEY = {};
+let EXPLAIN = {};
+let QNAMES = [];
+
+// Fallback (falls txt fehlt / Parsing kaputt ist)
+const DEFAULT_QUIZ = {
+  title: "5. Die Expansion des Universums",
+  sub: "7 Fragen, pro Frage ist genau eine Antwort richtig.",
+  questions: [
+    {
+      text: "Was beschreibt die Hubble-Konstante H0 am besten?",
+      options: {
+        a: "Die Temperatur der kosmischen Hintergrundstrahlung",
+        b: "Wie stark die Fluchtgeschwindigkeit mit der Entfernung zunimmt",
+        c: "Die Masse einer typischen Galaxie"
+      },
+      correct: "b",
+      explain: {
+        a: "Nicht ganz: Das wäre kosmische Hintergrundstrahlung (CMB).",
+        b: "Richtig: H0 sagt, wie stark v mit d zunimmt.",
+        c: "Nicht ganz: H0 hat nichts mit der Masse einer Galaxie zu tun."
+      }
+    },
+    {
+      text: "Welche Beziehung passt zum Hubble-Gesetz?",
+      options: {
+        a: "\\(v = H_0 \\cdot d\\)",
+        b: "\\(d = H_0 \\cdot v^2\\)",
+        c: "\\(v = \\frac{d}{H_0^2}\\)"
+      },
+      correct: "a",
+      explain: {
+        a: "Richtig: Hubble-Gesetz v = H0 · d.",
+        b: "Nicht ganz: v^2 kommt hier nicht vor.",
+        c: "Nicht ganz: Das wäre keine lineare Proportionalität."
+      }
+    },
+    {
+      text: "Was bedeutet „kein Mittelpunkt der Expansion“ (Luftballon-Modell)?",
+      options: {
+        a: "Galaxien bewegen sich von einem Explosionszentrum weg",
+        b: "Der Raum dehnt sich aus; jeder Punkt sieht andere wegdriften",
+        c: "Nur unsere Galaxie bewegt sich, alle anderen stehen still"
+      },
+      correct: "b",
+      explain: {
+        a: "Nicht ganz: Es ist keine Explosion von einem Zentrum.",
+        b: "Richtig: Der Raum dehnt sich aus, es gibt keinen ausgezeichneten Mittelpunkt.",
+        c: "Nicht ganz: Nicht nur wir bewegen uns – Abstände wachsen überall."
+      }
+    }
+  ]
 };
+
+async function loadQuizTxt(path = QUIZ_TXT_PATH) {
+  const res = await fetch(path, { cache: "no-store" });
+  if (!res.ok) throw new Error(`quiz txt not found: ${path} (${res.status})`);
+  return await res.text();
+}
+
+/**
+ * TXT-Format (einfach erweiterbar):
+ *
+ * TITLE: 5. Die Expansion des Universums
+ * SUB: 7 Fragen, pro Frage ist genau eine Antwort richtig.
+ *
+ * Q: Was beschreibt die Hubble-Konstante H0 am besten?
+ * A: Die Temperatur der kosmischen Hintergrundstrahlung
+ * B: Wie stark die Fluchtgeschwindigkeit mit der Entfernung zunimmt
+ * C: Die Masse einer typischen Galaxie
+ * CORRECT: B
+ * EXPLAIN_A: Nicht ganz: ...
+ * EXPLAIN_B: Richtig: ...
+ * EXPLAIN_C: Nicht ganz: ...
+ *
+ * Q: Nächste Frage ...
+ * ...
+ */
+function parseQuizTxt(txt) {
+  const out = { title: null, sub: null, questions: [] };
+
+  const lines = String(txt || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n");
+
+  let cur = null;
+
+  function pushCur() {
+    if (!cur) return;
+    // validate minimal
+    const optKeys = Object.keys(cur.options || {});
+    if (!cur.text || optKeys.length < 2 || !cur.correct) {
+      throw new Error("Invalid question block (missing text/options/correct).");
+    }
+    if (!cur.options[cur.correct]) {
+      throw new Error(`Correct option '${cur.correct}' not found in options.`);
+    }
+    // default explains if missing
+    cur.explain = cur.explain || {};
+    for (const k of optKeys) {
+      if (!cur.explain[k]) cur.explain[k] = "Danke! Schau dir die Lösung an.";
+    }
+    out.questions.push(cur);
+    cur = null;
+  }
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+
+    const mTitle = line.match(/^TITLE\s*:\s*(.+)$/i);
+    if (mTitle) { out.title = mTitle[1].trim(); continue; }
+
+    const mSub = line.match(/^SUB\s*:\s*(.+)$/i);
+    if (mSub) { out.sub = mSub[1].trim(); continue; }
+
+    const mQ = line.match(/^Q\s*:\s*(.+)$/i);
+    if (mQ) {
+      pushCur();
+      cur = { text: mQ[1].trim(), options: {}, correct: null, explain: {} };
+      continue;
+    }
+
+    if (!cur) {
+      // ignore stray lines before first Q:
+      continue;
+    }
+
+    const mOpt = line.match(/^([A-Z])\s*:\s*(.+)$/);
+    if (mOpt) {
+      const key = mOpt[1].toLowerCase();
+      cur.options[key] = mOpt[2].trim();
+      continue;
+    }
+
+    const mCorrect = line.match(/^CORRECT\s*:\s*([A-Z])\s*$/i);
+    if (mCorrect) {
+      cur.correct = mCorrect[1].toLowerCase();
+      continue;
+    }
+
+    const mExplain = line.match(/^EXPLAIN_([A-Z])\s*:\s*(.+)$/i);
+    if (mExplain) {
+      const k = mExplain[1].toLowerCase();
+      cur.explain[k] = mExplain[2].trim();
+      continue;
+    }
+  }
+
+  pushCur();
+
+  if (!out.questions.length) throw new Error("No questions found in txt.");
+  return out;
+}
+
+function setHeroText({ title, sub }) {
+  const h1 = document.querySelector(".hero h1");
+  const p = document.querySelector(".hero .sub");
+  if (h1 && title) h1.textContent = title;
+  if (p && sub) p.textContent = sub;
+}
+
+function renderQuestions(questions) {
+  const container = document.getElementById("questions");
+  if (!container) throw new Error("Missing #questions container in HTML.");
+
+  container.innerHTML = "";
+
+  questions.forEach((q, idx) => {
+    const qname = `q${idx + 1}`;
+
+    const article = document.createElement("article");
+    article.className = "q";
+    article.dataset.q = qname;
+
+    const top = document.createElement("div");
+    top.className = "q__top";
+
+    const h2 = document.createElement("h2");
+    h2.textContent = `${idx + 1}) ${q.text}`;
+
+    const pill = document.createElement("div");
+    pill.className = "pill";
+    pill.id = `pill-${qname}`;
+    pill.textContent = "offen";
+
+    top.appendChild(h2);
+    top.appendChild(pill);
+
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "options";
+    fieldset.setAttribute("aria-label", `Frage ${idx + 1} Antworten`);
+
+    // stable order: A,B,C,... based on keys
+    const optKeys = Object.keys(q.options).sort();
+    for (const k of optKeys) {
+      const label = document.createElement("label");
+      label.className = "opt";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = qname;
+      input.value = k;
+
+      const spanLabel = document.createElement("span");
+      spanLabel.className = "opt__label";
+      spanLabel.textContent = q.options[k];
+
+      const mark = document.createElement("span");
+      mark.className = "opt__mark";
+      mark.setAttribute("aria-hidden", "true");
+
+      label.appendChild(input);
+      label.appendChild(spanLabel);
+      label.appendChild(mark);
+      fieldset.appendChild(label);
+    }
+
+    const fb = document.createElement("div");
+    fb.className = "feedback";
+    fb.id = `fb-${qname}`;
+    fb.setAttribute("aria-live", "polite");
+
+    article.appendChild(top);
+    article.appendChild(fieldset);
+    article.appendChild(fb);
+
+    container.appendChild(article);
+  });
+}
+
+function buildRuntimeKeyExplain(questions) {
+  const key = {};
+  const explain = {};
+  questions.forEach((q, idx) => {
+    const qname = `q${idx + 1}`;
+    key[qname] = q.correct;
+    explain[qname] = q.explain || {};
+  });
+  return { key, explain, qnames: Object.keys(key) };
+}
+
+async function initQuizFromTxt() {
+  let def = null;
+
+  try {
+    const txt = await loadQuizTxt(QUIZ_TXT_PATH);
+    def = parseQuizTxt(txt);
+  } catch (e) {
+    console.warn("Quiz TXT konnte nicht geladen/geparst werden – benutze Fallback.", e);
+    def = DEFAULT_QUIZ;
+  }
+
+  setHeroText(def);
+  renderQuestions(def.questions);
+
+  const runtime = buildRuntimeKeyExplain(def.questions);
+  KEY = runtime.key;
+  EXPLAIN = runtime.explain;
+  QNAMES = runtime.qnames;
+}
+// ==========================================================================
 
 const quizForm = document.getElementById("quiz");
 const gradeBtn = document.getElementById("gradeBtn");
@@ -67,10 +319,10 @@ function shuffleChildren(parent) {
   }
   kids.forEach(k => parent.appendChild(k));
 }
+await initQuizFromTxt();
 document.querySelectorAll(".options").forEach(shuffleChildren);
 
 
-const QNAMES = Object.keys(KEY);
 let gradedOnce = false;
 
 // --- Start/Lock + Timer ---
@@ -119,9 +371,10 @@ function unlockQuiz({startNow}){
   if (startNow) startTimer();
 }
 
-function resetAll({showOverlay = false, restartTimer = false} = {}){
+async function resetAll({showOverlay = false, restartTimer = false} = {}){
   quizForm.reset();
-  document.querySelectorAll(".options").forEach(shuffleChildren);
+  await initQuizFromTxt();
+document.querySelectorAll(".options").forEach(shuffleChildren);
   for (const q of QNAMES) clearMarks(q);
   gradedOnce = false;
   hideResult();
