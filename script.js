@@ -322,9 +322,15 @@ function shuffleChildren(parent) {
   }
   kids.forEach(k => parent.appendChild(k));
 }
-await initQuizFromTxt();
-document.querySelectorAll(".options").forEach(shuffleChildren);
-
+// Quiz laden ohne das ganze Script zu blockieren (damit "Los" immer klickbar bleibt)
+initQuizFromTxt()
+  .then(() => {
+    document.querySelectorAll(".options").forEach(shuffleChildren);
+    updateProgress(); // falls Anzahl Fragen aus TXT != 3
+  })
+  .catch((e) => {
+    console.warn("initQuizFromTxt failed (non-blocking):", e);
+  });
 
 let gradedOnce = false;
 
@@ -448,7 +454,7 @@ function updateProgress() {
   for (const q of QNAMES) {
     if (quizForm.querySelector(`input[name="${q}"]:checked`)) answered++;
   }
-  answeredMeta.textContent = `${answered}/3 beantwortet`;
+  answeredMeta.textContent = `${answered}/${QNAMES.length} beantwortet`;
   progressBar.style.width = `${(answered / QNAMES.length) * 100}%`;
 }
 quizForm.addEventListener("change", updateProgress);
@@ -531,10 +537,10 @@ gradeBtn.addEventListener("click", async () => {
   // againBtn.hidden = false;
 
   if (score === QNAMES.length) {
-    showResult(`✅ ${score}/3 richtig – sehr gut!  (Zeit: ${used})`, "ok");
+    showResult(`✅ ${score}/${QNAMES.length} richtig – sehr gut!  (Zeit: ${used})`, "ok");
     window.confettiRain?.(1400);
   } else {
-    showResult(`➡️ ${score}/3 richtig. (Zeit: ${used})  Schau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
+    showResult(`➡️ ${score}/${QNAMES.length} richtig. (Zeit: ${used})  Schau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
   }
 
   // ---- Firestore + Analytics (unsichtbar im Hintergrund) ----
