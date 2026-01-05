@@ -408,9 +408,15 @@ startOverlay.hidden = false;
 document.body.classList.add("is-locked");
 
 // Los ist erst aktiv, wenn Name vorhanden
-function normName(s){
-  return (s || "").trim().replace(/\s+/g, " ");
+function normCode(s){
+  return (s || "")
+    .normalize("NFKC")
+    .trim()
+    .replace(/\s+/g, "");
 }
+
+const ADMIN_CODE = "Schule3";
+
 function updateStartState(){
   const name = normName(nameInput?.value);
   const ok = name.length >= 2;
@@ -426,8 +432,16 @@ if (nameInput){
 updateStartState();
 
 startBtn.addEventListener("click", async () => {
-  const name = normName(nameInput?.value);
-  if (!name || name.length < 2) return;
+  const raw = nameInput?.value ?? "";
+  const entered = normCode(raw);
+  const admin = normCode(ADMIN_CODE);
+
+  if (entered === admin) {
+    sessionStorage.setItem("admin_mode", "1");
+    sessionStorage.removeItem("attempt_id");
+    location.href = "./admin.html";
+    return;
+  }
 
   try {
     const ref = await addDoc(collection(db, "attempts"), {
