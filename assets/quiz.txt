@@ -12,7 +12,7 @@ EXPLAIN_B: Richtig: H0 sagt, wie stark v mit d zunimmt.
 EXPLAIN_C: Nicht ganz: H0 hat nichts mit der Masse einer Galaxie zu tun.
 
 Q: Welche Beziehung passt zum Hubble-Gesetz?
-A: \(v = H_0 \cdot d\)
+A: v = H * d
 B: \(d = H_0 \cdot v^2\)
 C: \(v = \frac{d}{H_0^2}\)
 CORRECT: A
