@@ -440,6 +440,6 @@ body.is-locked .wrap, body.is-locked .wrap *{
 }
 
 .opt input:disabled + .opt__label {
-  opacity: 0.01;
+  opacity: 0.9;
   cursor: not-allowed;
 }
