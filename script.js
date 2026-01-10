@@ -405,6 +405,7 @@ function unlockQuiz({startNow}){
 
 async function resetAll({showOverlay = false, restartTimer = false} = {}){
   quizForm.reset();
+  setQuizDisabled(false);
   await initQuizFromTxt();
 document.querySelectorAll(".options").forEach(shuffleChildren);
   for (const q of QNAMES) clearMarks(q);
@@ -583,16 +584,7 @@ gradeBtn.addEventListener("click", async () => {
   
   const total = QNAMES.length;
   const percentNum = (score / total) * 100;        // Zahl
-  const percent = percentNum.toFixed(1);           // Text für Anzeige
-
-  const color = percentToColor(percentNum);
-  resultBox.style.borderColor = color;
-  resultBox.style.color = color;
-
-  if (score === total) { // oder: if (percentNum === 100)
-    resultBox.style.background = "rgba(34,197,94,.15)";
-  }
-
+  const percentText = percentNum.toFixed(1);           // Text für Anzeige
 
   if (score === QNAMES.length) {
     showResult(`✅ ${score}/${total} richtig <span id="percentSpan">(${percentText}%)</span> – sehr gut!  (Zeit: ${used})`, "ok");
@@ -601,6 +593,23 @@ gradeBtn.addEventListener("click", async () => {
     showResult(`➡️ ${score}/${total} richtig <span id="percentSpan">(${percentText}%)</span> (Zeit: ${used})  \nSchau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
   }
 
+  // ab hier: Farben setzen (NACH showResult)
+  const color = percentToColor(percentNum);
+
+  const percentSpan = document.getElementById("percentSpan");
+  if (percentSpan) {
+    percentSpan.style.color = color;
+    percentSpan.style.fontWeight = "700";
+  }
+
+  // optional: Rahmen auch im Verlauf einfärben (wenn du willst)
+  // resultBox.style.borderColor = color;
+
+  // 100% Hintergrund “extra grün”
+  if (score === total) {
+    resultBox.style.background = "rgba(34,197,94,.15)";
+  }
+  
   const percentSpan = document.getElementById("percentSpan");
   if (percentSpan) {
     percentSpan.style.color = color;
