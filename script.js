@@ -454,6 +454,13 @@ if (nameInput){
 }
 updateStartState();
 
+function percentToColor(p) {
+  // p: 0–100
+  // 0 = rot (0°), 50 = gelb (60°), 100 = grün (120°)
+  const hue = Math.max(0, Math.min(120, (p / 100) * 120));
+  return `hsl(${hue}, 85%, 55%)`;
+}
+
 startBtn.addEventListener("click", async () => {
   const raw = nameInput?.value ?? "";
   const name = raw.trim();
@@ -573,12 +580,25 @@ gradeBtn.addEventListener("click", async () => {
   const usedMs = stopTimer();
   const used = fmt(usedMs);
   // againBtn.hidden = false;
+  
+  const total = QNAMES.length;
+  const percentNum = (score / total) * 100;        // Zahl
+  const percent = percentNum.toFixed(1);           // Text für Anzeige
+
+  const color = percentToColor(percentNum);
+  resultBox.style.borderColor = color;
+  resultBox.style.color = color;
+
+  if (score === total) { // oder: if (percentNum === 100)
+    resultBox.style.background = "rgba(34,197,94,.15)";
+  }
+
 
   if (score === QNAMES.length) {
-    showResult(`✅ ${score}/${QNAMES.length} richtig – sehr gut!  (Zeit: ${used})`, "ok");
+    showResult(`✅ ${score}/${total} richtig (${percent}%) – sehr gut!  (Zeit: ${used})`, "ok");
     window.confettiRain?.(1400);
   } else {
-    showResult(`➡️ ${score}/${QNAMES.length} richtig. (Zeit: ${used})  Schau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
+    showResult(`➡️ ${score}/${total} richtig (${percent}%) (Zeit: ${used})  \nSchau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
   }
 
   setQuizDisabled(true); // nach Bewertung sperren
