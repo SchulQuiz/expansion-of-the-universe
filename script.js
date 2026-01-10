@@ -389,6 +389,14 @@ function stopTimer(){
   return elapsedMs;
 }
 
+function setQuizDisabled(disabled) {
+  quizForm
+    .querySelectorAll('input[type="radio"]')
+    .forEach(input => {
+      input.disabled = disabled;
+    });
+}
+
 function unlockQuiz({startNow}){
   document.body.classList.remove("is-locked");
   startOverlay.hidden = true;
@@ -572,6 +580,8 @@ gradeBtn.addEventListener("click", async () => {
   } else {
     showResult(`➡️ ${score}/${QNAMES.length} richtig. (Zeit: ${used})  Schau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
   }
+
+  setQuizDisabled(true); // nach Bewertung sperren
 
   // ---- Firestore + Analytics (unsichtbar im Hintergrund) ----
   try {

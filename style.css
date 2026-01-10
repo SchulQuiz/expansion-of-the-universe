@@ -438,3 +438,8 @@ body.is-locked .wrap, body.is-locked .wrap *{
   transform: none !important;
   accent-color: auto;
 }
+
+.opt input:disabled + .opt__label {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
