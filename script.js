@@ -595,10 +595,16 @@ gradeBtn.addEventListener("click", async () => {
 
 
   if (score === QNAMES.length) {
-    showResult(`✅ ${score}/${total} richtig (${percent}%) – sehr gut!  (Zeit: ${used})`, "ok");
+    showResult(`✅ ${score}/${total} richtig <span id="percentSpan">(${percentText}%)</span> – sehr gut!  (Zeit: ${used})`, "ok");
     window.confettiRain?.(1400);
   } else {
-    showResult(`➡️ ${score}/${total} richtig (${percent}%) (Zeit: ${used})  \nSchau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
+    showResult(`➡️ ${score}/${total} richtig <span id="percentSpan">(${percentText}%)</span> (Zeit: ${used})  \nSchau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
+  }
+
+  const percentSpan = document.getElementById("percentSpan");
+  if (percentSpan) {
+    percentSpan.style.color = color;
+    percentSpan.style.fontWeight = "700";
   }
 
   setQuizDisabled(true); // nach Bewertung sperren
@@ -636,7 +642,7 @@ resetBtn.addEventListener("click", () => {
 // });
 
 function showResult(text, tone) {
-  resultBox.textContent = text;
+  resultBox.innerHTML = text;
   resultBox.classList.add("show");
   // slight tone tweak via border color
   if (tone === "ok") {
