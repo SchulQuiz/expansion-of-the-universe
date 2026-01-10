@@ -405,7 +405,6 @@ function unlockQuiz({startNow}){
 
 async function resetAll({showOverlay = false, restartTimer = false} = {}){
   quizForm.reset();
-  setQuizDisabled(false);
   await initQuizFromTxt();
 document.querySelectorAll(".options").forEach(shuffleChildren);
   for (const q of QNAMES) clearMarks(q);
@@ -454,13 +453,6 @@ if (nameInput){
   });
 }
 updateStartState();
-
-function percentToColor(p) {
-  // p: 0–100
-  // 0 = rot (0°), 50 = gelb (60°), 100 = grün (120°)
-  const hue = Math.max(0, Math.min(120, (p / 100) * 120));
-  return `hsl(${hue}, 85%, 55%)`;
-}
 
 startBtn.addEventListener("click", async () => {
   const raw = nameInput?.value ?? "";
@@ -581,39 +573,12 @@ gradeBtn.addEventListener("click", async () => {
   const usedMs = stopTimer();
   const used = fmt(usedMs);
   // againBtn.hidden = false;
-  
-  const total = QNAMES.length;
-  const percentNum = (score / total) * 100;        // Zahl
-  const percentText = percentNum.toFixed(1);           // Text für Anzeige
 
   if (score === QNAMES.length) {
-    showResult(`✅ ${score}/${total} richtig <span id="percentSpan">(${percentText}%)</span> – sehr gut!  (Zeit: ${used})`, "ok");
+    showResult(`✅ ${score}/${QNAMES.length} richtig – sehr gut!  (Zeit: ${used})`, "ok");
     window.confettiRain?.(1400);
   } else {
-    showResult(`➡️ ${score}/${total} richtig <span id="percentSpan">(${percentText}%)</span> (Zeit: ${used})  \nSchau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
-  }
-
-  // ab hier: Farben setzen (NACH showResult)
-  const color = percentToColor(percentNum);
-
-  const percentSpan = document.getElementById("percentSpan");
-  if (percentSpan) {
-    percentSpan.style.color = color;
-    percentSpan.style.fontWeight = "700";
-  }
-
-  // optional: Rahmen auch im Verlauf einfärben (wenn du willst)
-  // resultBox.style.borderColor = color;
-
-  // 100% Hintergrund “extra grün”
-  if (score === total) {
-    resultBox.style.background = "rgba(34,197,94,.15)";
-  }
-  
-  const percentSpan = document.getElementById("percentSpan");
-  if (percentSpan) {
-    percentSpan.style.color = color;
-    percentSpan.style.fontWeight = "700";
+    showResult(`➡️ ${score}/${QNAMES.length} richtig. (Zeit: ${used})  Schau dir die markierten Stellen erneut an versuche es nochmal.`, "info");
   }
 
   setQuizDisabled(true); // nach Bewertung sperren
@@ -651,7 +616,7 @@ resetBtn.addEventListener("click", () => {
 // });
 
 function showResult(text, tone) {
-  resultBox.innerHTML = text;
+  resultBox.textContent = text;
   resultBox.classList.add("show");
   // slight tone tweak via border color
   if (tone === "ok") {
