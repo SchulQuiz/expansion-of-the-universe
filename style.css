@@ -23,20 +23,23 @@ html{
   position: relative;
 }
 
+/* alter Oberlay, neuer siehe unten in body (background)
 html::before{
   content:"";
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.12); /* Stärke nach Geschmack, ehemals 22 */
+  background: rgba(0,0,0,.12);
   pointer-events: none;
-  z-index: 0; /* unter .wrap (z=1), über dem Body-Background */
+  z-index: 0;  unter .wrap (z=1), über dem Body-Background 
 }
+*/
 
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
   color:var(--text);
-  background: radial-gradient(1200px 800px at 20% 10%, rgba(21,26,85,.85) 0%, transparent 58%),
+  background: linear-gradient(rgba(0,0,0,.22), rgba(0,0,0,.22)), /* ehemaliger Overlay wegen Aussehen in statische Hintergrunddimmung geändert, Stärke ehemals .22 */
+              radial-gradient(1200px 800px at 20% 10%, rgba(21,26,85,.85) 0%, transparent 58%),
               radial-gradient(1000px 700px at 85% 25%, rgba(14,79,111,.78) 0%, transparent 62%),
               linear-gradient(180deg, var(--bg1), var(--bg2));
   overflow-x:hidden;
