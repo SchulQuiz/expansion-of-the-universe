@@ -438,7 +438,7 @@ function normCode(s){
     .replace(/\s+/g, "");
 }
 
-const ADMIN_CODE = "Schule3";
+const test = "Schule3!Depp!";
 
 function updateStartState(){
   const name = normCode(nameInput?.value);
@@ -458,7 +458,7 @@ startBtn.addEventListener("click", async () => {
   const raw = nameInput?.value ?? "";
   const name = raw.trim();
   const entered = normCode(raw);
-  const admin = normCode(ADMIN_CODE);
+  const admin = normCode(test);
 
   if (entered === admin) {
     sessionStorage.setItem("admin_mode", "1");
