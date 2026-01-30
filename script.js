@@ -460,12 +460,14 @@ startBtn.addEventListener("click", async () => {
   const entered = normCode(raw);
   const admin = normCode(test);
 
+  /*
   if (entered === admin) {
     sessionStorage.setItem("admin_mode", "1");
     sessionStorage.removeItem("attempt_id");
     location.href = "./admin.html";
     return;
   }
+  */
 
   try {
     const ref = await addDoc(collection(db, "attempts"), {
